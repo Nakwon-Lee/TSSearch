@@ -18,20 +18,15 @@ class TraversalStrategy:
 		prob = 0.9
 		#TODO add a child to the current node with specific probability repeatedly
 		while(random.random() < prob):
-			print('howmany?')
 			ato = currnode.ato
-			print(ato.name)
 			if isinstance(ato,FiniteDomainTotalOrder): # can have more than one children
-				print(str(len(ato.domain)) + ' ' + str(len(currnode.children)))
 				ret1 = 0
 				if len(ato.domain) > len(currnode.children):
 					ret1 = self.addValidChild(currnode)
 				if ret1 is 0:
 					if random.random() < 0.2 and len(currnode.children) is not 0:
 						idx = random.randrange(len(currnode.children))
-						print('idx: '+str(idx))
 						currnode = currnode.children[idx]
-						print('Down!')
 			elif isinstance(ato,AtomicTotalOrder): #can have only one child
 				ret2 = 0
 				if 1 > len(currnode.children):
@@ -39,11 +34,9 @@ class TraversalStrategy:
 				if ret2 is 0:
 					if random.random() < 0.7:
 						currnode = currnode.children[0]
-						print('Down!')
 			else:
 				print('ato should be the TotalOrder')
 			if random.random() < 0.3 and currnode.parent is not None:
-				print('Up!')
 				currnode = currnode.parent
 			prob = prob - 0.01
 
@@ -58,11 +51,10 @@ class TraversalStrategy:
 			if key:
 				currnode.popChild()
 				if nances >= self.namesize:
-					print('ances: ' + str(nances))
 					key = False
 					ret = -1
 			else:
-				print(mchild.ato.name)
+				pass
 		return ret
 
 	def randomSelectionLabFuncs(self):
