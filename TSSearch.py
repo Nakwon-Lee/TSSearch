@@ -119,19 +119,27 @@ def ttOdrToXML(pttOdr,pxmlfile):
 
 def xmlDFS(curr,elem):
 	ato = curr.ato
-	subelem = ET.Element(curr.ato.name)
-	subelem.attrib['Odr'] = str(curr.ato.odr)
-	elem.append(subelem)
-	if isinstance(ato,FiniteDomainTotalOrder):
-		domval = ''
-		for dom in curr.ato.domain:
-			domval = domval + str(dom) + ','
-		subelem.attrib['Domain'] = domval[0:len(domval)-1]
+	subelem = None
+	if ato is None:
+		subelem = ET.Element('dumTtOdr')
+		elem.append(subelem)
+	else:
+		if isinstance(ato,FiniteDomainTotalOrder):
+			subelem = ET.Element('FaTtOdr')
+			subelem.attrib['Name'] = curr.ato.name
+			subelem.attrib['Odr'] = str(curr.ato.odr)
+			elem.append(subelem)
+			domval = ''
+			for dom in curr.ato.domain:
+				domval = domval + str(dom) + ','
+			subelem.attrib['Domain'] = domval[0:len(domval)-1]
+		elif isinstance(ato,AtomicTotalOrder):
+			subelem = ET.Element('aTtOdr')
+			subelem.attrib['Name'] = curr.ato.name
+			subelem.attrib['Odr'] = str(curr.ato.odr)
+			elem.append(subelem)
 		for i in range(len(curr.children)):
 			xmlDFS(curr.children[i],subelem)
-	elif isinstance(ato,AtomicTotalOrder):
-		if len(curr.children) is not 0:
-			xmlDFS(curr.children[0],subelem)
 
 def indent(elem, level=0):
     i = '\n' + level*'  '
@@ -162,10 +170,11 @@ def main():
 
 	currts = None
 	bestts = None
+	tempts = None
 	bestvals = None
 	outlog = 'output.log'
 	fitvars = ('NoAffS','VL','VC','Time','Result')
-	labfuncs = (('isAbs',1,(0,1),0),('isAbs',1,(0,1),1),('blkD',0,0),('blkD',0,1),('CS',0,0),('CS',0,1),('tD',0,0),('tD',0,1),('RPO',0,0),('RPO',0,1),('uID',0,0),('uID',0,1))
+	labfuncs = (('isAbs',1,(0,1),0),('isAbs',1,(0,1),1),('blkD',0,0),('blkD',0,1),('CS',0,0),('CS',0,1),('RPO',0,0),('RPO',0,1),('uID',0,0),('uID',0,1))
 	atos = None
 	valuefile = 'fitvalues.txt'
 	bestvalfile = 'bestfitvalues.txt'
@@ -183,14 +192,18 @@ def main():
 
 	currvals = None
 
-	for i in range(20):
+	for i in range(10):
 		
 		print('\nTraversal Strategy Search Iter ',i)
 		#TODO Make a new solution
 		# local search
 		# make a new search strategy formula (total order)
-		currts = TraversalStrategy(atos)
-		currts.randomOdrGen()
+		if currts == None:
+			currts = TraversalStrategy(atos)
+			currts.randomOdrGen()
+		else:
+			tempts = currts.deepcopyTS()
+			currts = currts.neighbourOdrGen()
 
 		currts.printTS()
 
@@ -203,6 +216,8 @@ def main():
 
 		benchexec.runexecutor.main()
 		newvals = other_after_run(outlog,fitvars)
+
+		print(len(newvals),'   ',len(fitvars))
 
 		if len(newvals) != len(fitvars):
 			print('Iteration Failed!')
@@ -230,7 +245,7 @@ def main():
 			ttOdrToXML(bestts,bestxmlfile)
 			print('new best!')
 		elif fitness is 0: #TODO update bestts with specific probability
-			pass
+			currts = tempts
 
 	return bestts
 

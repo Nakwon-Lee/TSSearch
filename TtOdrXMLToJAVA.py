@@ -40,29 +40,31 @@ def writingToJava(code,pjfile):
 
 def xmltoJavaDFS(elem, key):
 	code = ''
-	code = code + makeIfElse(elem.tag,elem.get('Odr'),key)
-
-	domstr = elem.get('Domain')
-	domlist = None
-	if domstr is not None:
-		domlist = domstr.split(',')	
-
 	children = list(elem)
-
-	if domlist is not None: # finite domain
-		code = code + makeSwitchHeader(elem.tag,key)
-		for i in range(len(children)):
-			code = code + makeSwitchCase(domlist[i],key)
-			code = code + xmltoJavaDFS(children[i], key+1)
-			code = code + makeBreak(key)
-		code = code + makeDefaultCase(key)
-		code = code + makeBreak(key)
+	if elem.tag == 'dumTtOdr':
+		pass
+	elif elem.tag == 'aTtOdr':
+		code = code + makeIfElse(elem.get('Name'),elem.get('Odr'),key)
+		code = code + xmltoJavaDFS(children[0], key+1)
 		code = code + (key*' ') + '}\n'
-	else: # infinite domain
-		for i in range(len(children)):
-			code = code + xmltoJavaDFS(children[i], key+1)
-
-	code = code + (key*' ') + '}\n'
+	elif elem.tag == 'FaTtOdr':
+		code = code + makeIfElse(elem.get('Name'),elem.get('Odr'),key)
+		domstr = elem.get('Domain')
+		domlist = None
+		if domstr is not None:
+			domlist = domstr.split(',')
+		if domlist is not None: # finite domain
+			code = code + makeSwitchHeader(elem.get('Name'),key)
+			for i in range(len(children)):
+				code = code + makeSwitchCase(domlist[i],key)
+				code = code + xmltoJavaDFS(children[i], key+1)
+				code = code + makeBreak(key)
+			code = code + makeDefaultCase(key)
+			code = code + makeBreak(key)
+			code = code + (key*' ') + '}\n'
+		code = code + (key*' ') + '}\n'
+	else:	
+		pass
 
 	return code
 
