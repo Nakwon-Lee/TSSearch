@@ -4,12 +4,14 @@ from collections import deque
 class TraversalStrategy:
 
 	def __init__(self,patos):
-		self.atos = patos
+		self.origatos = patos
+		self.atos = patos[1:len(patos)-1]
+		self.atox = patos[0:3]
 		nameset = set()
 		for ato in self.atos:
 			nameset.add(ato.name)
 		self.namesize = len(nameset)
-		print('namesize: ' + str(self.namesize))
+		#print('namesize: ' + str(self.namesize))
 		self.toroot = None
 
 	def neighbourOdrGen(self):
@@ -24,8 +26,8 @@ class TraversalStrategy:
 			#Swap nodes (no modification of tree structure)
 			retts, ret = self.genSwapNodes()
 		elif key == 2:
+			pass
 			#Add a subtree to a leaf
-			
 		#Swap subtrees
 		if ret < 0:
 			print("neighbour gen fail")
@@ -148,6 +150,19 @@ class TraversalStrategy:
 
 		return nodes
 
+	def getSubNodes(self, root):
+		nodes = []
+		stack = []
+		stack.append(root)
+		while len(stack) > 0:
+			node = stack.pop()
+			if node.ato != None:
+				nodes.append(node)
+			for child in node.children:
+				stack.append(child)
+
+		return nodes
+
 	def getLeafs(self):
 		leafs = []
 		stack = []
@@ -181,15 +196,35 @@ class TraversalStrategy:
 	def randomOdrGen(self):
 		self.toroot = TtOdrNode(None)
 		leafs = []
-		k = self.assignValidAto(leafs,self.toroot)
+		#k = self.assignValidAto(leafs,self.toroot)
+		self.assignRanAto(leafs,self.toroot)
 		prob = 0.9
 		#TODO add a child to the current node with specific probability repeatedly
 		while(random.random() < prob and len(leafs) != 0):
 			random.shuffle(leafs)
 			leaf = leafs.pop()
-			r = self.assignValidAto(leafs,leaf)
+			#r = self.assignValidAto(leafs,leaf)
+			self.assignRanAto(leafs,leaf)
 			# probability decreasing
 			prob = prob - 0.01
+		self.finishingTS()
+
+	def assignRanAto(self,leafs,currnode):
+		ret = 0
+		key = True
+		nances = 0
+		ato = self.randomSelectionLabFuncs()
+		currnode.ato = ato
+		
+		if isinstance(ato,FiniteDomainTotalOrder): # can have more than one children
+			for dom in ato.domain:
+				child = TtOdrNode(None)
+				currnode.addChild(child)
+		elif isinstance(ato,AtomicTotalOrder): #can have only one child
+			child = TtOdrNode(None)
+			currnode.addChild(child)
+		for child in currnode.children:
+			leafs.append(child)
 
 	def assignValidAto(self,leafs,currnode):
 		ret = 0
@@ -277,7 +312,7 @@ class TraversalStrategy:
 			self.DFS(child,tab)
 
 	def deepcopyTS(self):
-		clonets = TraversalStrategy(self.atos)
+		clonets = TraversalStrategy(self.origatos)
 		clonets.toroot = self.deepcopyTSDFS(self.toroot)
 
 		return clonets
@@ -291,6 +326,17 @@ class TraversalStrategy:
 			clonechild.setParent(clonenode)
 
 		return clonenode
+
+	def finishingTS(self):
+		newroot = TtOdrNode(self.atox[0])
+		child1 = TtOdrNode(self.atox[1])
+		newroot.addChild(child1)
+		child11 = TtOdrNode(self.atox[2])
+		child1.addChild(child11)
+		child111 = TtOdrNode(None)
+		child11.addChild(child111)
+		newroot.addChild(self.toroot)
+		self.toroot = newroot
 
 class AtomicTotalOrder:
 
@@ -316,6 +362,10 @@ class TtOdrNode:
 
 	def addChild(self,pchild):
 		self.children.append(pchild)
+		pchild.setParent(self)
+
+	def setChild(self,pchild, idx):
+		self.children[idx] = pchild
 		pchild.setParent(self)
 
 	def popChild(self):
