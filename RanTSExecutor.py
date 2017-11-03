@@ -17,6 +17,22 @@ for egg in glob.glob(os.path.join(os.path.dirname(__file__), os.pardir, 'lib', '
 import benchexec.runexecutor
 from TraversalStrategyModels import *
 
+class RanTSExecutor:
+	def __init__(self, labfuncs):
+		self.atos = TSS.makingAtomTotalOrders(labfuncs)
+
+	def genRanTS(self, currxmlfile, searchstrategyjavafile):
+		indiv = TraversalStrategy(atos)
+		indiv.randomOdrGen()
+		TSS.ttOdrToXML(indiv,currxmlfile)
+		XtJ.xmltoJava(currxmlfile,searchstrategyjavafile)
+
+	def Execute(self, outlog, fitvars):
+		TSS.buildExecutable()
+		benchexec.runexecutor.main()
+		newvals = TSS.other_after_run(outlog,fitvars)
+		return newvals
+
 def main():
 	outlog = 'output.log'
 	fitvalsfile = 'fitvalues.csv'
@@ -24,19 +40,14 @@ def main():
 	searchstrategyjavafile = 'src/org/sosy_lab/cpachecker/core/searchstrategy/MySearchStrategyFormula.java'
 	fitvars = ('NoAffS','VL','VC','Time','Result')
 	labfuncs = (('isAbs',1,(0,1),0),('CS',0,1),('RPO',0,1),('CS',0,0),('blkD',0,0),('blkD',0,1),('RPO',0,0),('uID',0,0),('uID',0,1),('LenP',0,1),('LenP',0,0),('loopD',0,1),('loopD',0,0))
-	atos = None
-	atos = TSS.makingAtomTotalOrders(labfuncs)
+
+	executor = RanTSExecutor(labfuncs)
 
 	#TODO generate a random TS
-	indiv = TraversalStrategy(atos)
-	indiv.randomOdrGen()
-	TSS.ttOdrToXML(indiv,currxmlfile)
-	XtJ.xmltoJava(currxmlfile,searchstrategyjavafile)
+	executor.genRanTS(currxmlfile, searchstrategyjavafile)
 
 	#TODO execute with the generated TS
-	TSS.buildExecutable()
-	benchexec.runexecutor.main()
-	newvals = TSS.other_after_run(outlog,fitvars)
+	newvals = executor.Execute(outlog, fitvars)
 
 	#TODO save fitvars of the executed result
 	csvfile = open(fitvalsfile, 'a')
