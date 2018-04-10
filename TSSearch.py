@@ -124,7 +124,7 @@ def binarySearchIdx(sortedlist,tup,pcomp):
 
 class MetricsHandler:
 	def __init__(self, outlog):
-		self.fitvars = ('NoAffS','VL','VC','Time','Result','AFC','SFC','NoR')
+		self.fitvars = ('NoAffS','VL','VC','Time','Result','AFC','SFC','NoR','NoIter','NoStop','AvgLenTP','DNonTItp','NoAbs','NoCSucc','AvgLenTPblk','DNonTItpblk','ENonTItp','ENonTItpblk','FCov','LCov','CCov','SizRS','TPredAbs','NoPredBAbs','TimPrec','NoBDDN','SizBDDQ','SizBDDQAvg','MaxWait','AvgWait','NoRL','TimPreAdj','TimTran')
 		self.out = outlog
 
 	def other_after_run(self):
@@ -152,7 +152,7 @@ class MetricsHandler:
 				tokens = line.split()
 				dic[self.fitvars[2]] = int(tokens[len(tokens)-1])
 
-			if line.find("Total CPU time for CPAchecker:") is not -1:
+			if line.find("CPU time for analysis:") is not -1:
 				tokens = line.split()
 				token = tokens[len(tokens)-1]
 				dic[self.fitvars[3]] = float(token[0:len(token)-1])
@@ -182,21 +182,141 @@ class MetricsHandler:
 				token = tokens[len(tokens)-1]
 				dic[self.fitvars[7]] = int(token)
 
+			if line.find("Number of iterations:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[8]] = int(token)
+
+			if line.find("Number of times stopped:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[9]] = int(token)
+
+			if line.find("Avg. length of target path (in blocks):") is not -1:
+				tokens = line.split()
+				token = tokens[7]
+				token2 = tokens[15]
+				token2 = token2[0:len(token2)-1]
+				dic[self.fitvars[10]] = float(token)
+				dic[self.fitvars[14]] = float(token2)
+
+			if line.find("Different non-trivial interpolants along paths:") is not -1:
+				tokens = line.split()
+				token = tokens[5]
+				token2 = tokens[len(tokens)-1]
+				token2 = token2[0:len(token2)-1]
+				dic[self.fitvars[11]] = int(token)
+				dic[self.fitvars[15]] = float(token2)
+
+			if line.find("Number of abstractions:") is not -1:
+				tokens = line.split()
+				token = tokens[3]
+				dic[self.fitvars[12]] = int(token)
+
+			if line.find("Number of computed successors:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[13]] = int(token)
+
+			if line.find("Equal non-trivial interpolants along paths:") is not -1:
+				tokens = line.split()
+				token = tokens[5]
+				token2 = tokens[len(tokens)-1]
+				token2 = token2[0:len(token2)-1]
+				dic[self.fitvars[16]] = int(token)
+				dic[self.fitvars[17]] = float(token2)
+
+			if line.find("Function coverage:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[18]] = float(token)
+
+			if line.find("Line coverage:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[19]] = float(token)
+
+			if line.find("Condition coverage:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[20]] = float(token)
+
+			if line.find("Size of reached set:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[21]] = int(token)
+
+			if line.find("Total predicates per abstraction:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[22]] = int(token)
+
+			if line.find("Number of preds handled by boolean abs:") is not -1:
+				tokens = line.split()
+				token = tokens[7]
+				dic[self.fitvars[23]] = int(token)
+
+			if line.find("Time for prec operator:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				token = token[0:len(token)-1]
+				dic[self.fitvars[24]] = float(token)
+
+			if line.find("Number of BDD nodes:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[25]] = int(token)
+
+			if line.find("Size of BDD node cleanup queue:") is not -1:
+				tokens = line.split()
+				token = tokens[6]
+				dic[self.fitvars[26]] = int(token)
+				token2 = tokens[len(tokens)-1]
+				token2 = token2[0:len(token2)-1]
+				dic[self.fitvars[27]] = float(token2)
+
+			if line.find("Max size of waitlist:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[28]] = int(token)
+
+			if line.find("Average size of waitlist:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				dic[self.fitvars[29]] = int(token)
+
+			if line.find("Number of reached locations:") is not -1:
+				tokens = line.split()
+				token = tokens[4]
+				dic[self.fitvars[30]] = int(token)
+
+			if line.find("Time for precision adjustment:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				token = token[0:len(token)-1]
+				dic[self.fitvars[31]] = float(token)
+
+			if line.find("Time for transfer relation:") is not -1:
+				tokens = line.split()
+				token = tokens[len(tokens)-1]
+				token = token[0:len(token)-1]
+				dic[self.fitvars[32]] = float(token)
+
 		return dic
 
 class TSSearch:
 	def __init__(self, labfuncs):
 		self.atos = makingAtomTotalOrders(labfuncs)
-		self.defaultargv = ['./scripts/RanTSExecutor.py', '--no-container', '--', 'scripts/cpa.sh', '-Dy-MySearchStrategy', '-preprocess', '-stats', '-setprop', 'cpa.predicate.memoryAllocationsAlwaysSucceed=true', '-spec', '../sv-benchmarks/c/ReachSafety.prp']
+		self.defaultargv = ['./scripts/RanTSExecutor.py', '--no-container', '--', 'scripts/cpa.sh', '-Dy-MySearchStrategy', '-heap', '-timelimit', '-preprocess', '-stats', '-noout', '-setprop', 'cpa.predicate.memoryAllocationsAlwaysSucceed=true', '-spec', '../sv-benchmarks/c/ReachSafety.prp']
 		self.myargv = None
 
 	def makeArgv(self, cores, memlimit, timelimit, algo, filen):
 		self.myargv = copy.deepcopy(self.defaultargv)
 		self.myargv[4] = self.myargv[4] + algo
+		self.myargv.insert(6,str(int(memlimit*0.8)))
+		self.myargv.insert(8,str(int(timelimit)))
 		self.myargv.insert(1,str(cores))
 		self.myargv.insert(1,"--cores")
-		self.myargv.insert(1,str(timelimit))
-		self.myargv.insert(1,"--hardtimelimit")
 		self.myargv.insert(1,str(timelimit*2))
 		self.myargv.insert(1,"--walltimelimit")
 		self.myargv.insert(1,str(memlimit))
@@ -218,7 +338,7 @@ def main():
 	bestts = None
 	tempts = None
 	bestvals = None
-	outlog = 'output/Statistics.txt'
+	outlog = 'output.log'
 	labfuncs = (('isAbs',1,(0,1),0),('CS',0,1),('RPO',0,1),('CS',0,0),('blkD',0,0),('blkD',0,1),('RPO',0,0),('uID',0,0),('uID',0,1),('LenP',0,1),('LenP',0,0),('loopD',0,1),('loopD',0,0))
 	atos = None
 	valuefile = 'fitvalues.txt'
@@ -300,13 +420,11 @@ def main():
 
 				executor = TSSearch(labfuncs)
 
-				executor.makeArgv(mycore, mymem, mytime, myfile)
+				executor.makeArgv(mycore, mymem, mytime, myalgo, myfile)
 
 				# Calculate the fitness of the new solution
 				# execution of cpachecker with new total order
-				newvals = executor.Execute(hdlr)
-
-				shutil.rmtree('output/')
+				newvals = executor.Execute(mhdlr)
 
 				population[i] = (population[i][0],newvals)
 

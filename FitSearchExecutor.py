@@ -4,6 +4,7 @@ import glob
 import os
 import sys
 import csv
+import shutil
 import xml.etree.ElementTree as ET
 import TtOdrXMLToJAVA as XtJ
 import copy
@@ -20,7 +21,7 @@ import benchexec.runexecutor
 from TraversalStrategyModels import *
 
 def main():
-	outlog = 'output/Statistics.txt'
+	outlog = 'output.log'
 	fitvalspre = 'fitvalues'
 	fitvalsprefull = 'fitvaluesFull'
 	currxmlfile = 'tsxml'
@@ -42,12 +43,15 @@ def main():
 	hdlr = TSS.MetricsHandler(outlog)
 
 	fc = None
-	if dirname != 'GIVEN':
-		fc = FileCollector(dirname, filename)
-		fc.makeFilelistCsv(csvfile, mydir)
-	else:
+	if dirname == 'GIVEN':
 		fc = FileCollector(dirname, filename)
 		fc.makeFilelistCsvGiven(csvfile, mydir, filename)
+	elif dirname == 'GIVEN2':
+		fc = FileCollector(dirname, filename)
+		fc.makeFilelistCsvGiven2(csvfile, mydir, filename)
+	else:
+		fc = FileCollector(dirname, filename)
+		fc.makeFilelistCsv(csvfile, mydir)
 
 	for afile in fc.filelist:
 
@@ -69,6 +73,8 @@ def main():
 			#TODO execute with the generated TS
 			newvals = executor.Execute(hdlr)
 
+			os.system('mv output.log ' + mydir + currxmlfile + afile['No.'] + '/' + 'output' + str(i) + '.log')
+
 			#assert len(newvals) == len(hdlr.fitvars), 'length of handled output missmatched'
 
 			#TODO save fitvars of the executed result
@@ -84,6 +90,8 @@ def main():
 			executor = RanTSExecutor(labfuncs)
 			executor.makeArgv(mycore, mymem, mytimefull, myalgo, afile['file name'])
 			newvals = executor.Execute(hdlr)
+
+			os.system('mv output.log ' + mydir + currxmlfile + afile['No.'] + '/' + 'outputF' + str(i) + '.log')
 
 			#TODO save fitvars of the executed result
 			csvfile = open(fitvalsfilefull, 'a')
