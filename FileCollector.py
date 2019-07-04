@@ -82,7 +82,7 @@ class FileCollector:
 				else:
 					fileset = set(self.p.glob(spline[0]))
 					for afile in fileset:
-						filenamelist.append(str(afile))
+						filenamelist.append('../'+str(afile))
 			filec.close()
 
 		print('No. of files: ',len(filenamelist))
